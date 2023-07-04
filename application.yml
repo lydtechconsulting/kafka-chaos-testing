@@ -1,0 +1,8 @@
+---
+kafka:
+    producer:
+        compressionType: gzip
+        batchSize: 16000
+        lingerMs: 10
+        acks: all
+        async: true

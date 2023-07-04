@@ -1,0 +1,6 @@
+---
+kafka:
+    bootstrap-servers: conduktorgateway:6969
+    consumer:
+        maxPollIntervalMs: 30000
+        maxPollRecords: 500
