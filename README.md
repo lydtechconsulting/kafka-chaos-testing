@@ -1,4 +1,6 @@
-# Kafka Spring Boot Choas Testing Demo Project
+# Kafka Spring Boot Chaos Testing Demo Project
+
+THIS IS WORK IN PROGRESS [04/07/2023]
 
 Spring Boot application demonstrating chaos testing a Kafka application with Conduktor Gateway.
 
