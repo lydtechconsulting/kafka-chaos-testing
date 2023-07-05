@@ -119,7 +119,7 @@ public class EndToEndIntegrationTest {
         TriggerEventsRequest request = TestData.buildTriggerEventsRequest(totalMessages);
 
         ResponseEntity<String> response = restTemplate.postForEntity("/v1/demo/trigger", request, String.class);
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
 
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testReceiver.counter::get, equalTo(totalMessages));

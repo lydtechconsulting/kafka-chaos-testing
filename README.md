@@ -8,7 +8,7 @@ Spring Boot application demonstrating chaos testing a Kafka application with Con
 
 The application provides a REST endpoint that accepts a request to trigger sending events.  The number of events to produce can be specified.
 
-Conduktor Gateway sits as a proxy between the Spring Boot application and Kafka.  The Gateway can be configured to simulate broker failure scenarios, returning errors to the producer requests.  This is used to verify that the application behaves as expected under error scenarios.  See more on Conduktor Gateway at `https://www.conduktor.io/`
+Conduktor Gateway sits as a proxy between the Spring Boot application and Kafka.  The Gateway can be configured to simulate broker failure scenarios, returning errors to the producer requests.  This is used to verify that the application behaves as expected under error scenarios.  See more on Conduktor Gateway at (https://www.conduktor.io/)[https://www.conduktor.io/]
 
 Component tests are used to automate these error scenarios, using Lydtech's component-test-framework and Testcontainers.
 
@@ -112,4 +112,9 @@ Further docker clean up (if network issues and to remove old networks/volumes):
 docker network prune
 docker system prune
 docker volume prune
+```
+
+# SCRATCH
+```
+14:13:27.786 WARN o.a.k.c.p.i.Sender - [Producer clientId=producer-1] Got error produce response with correlation id 460 on topic-partition demo-topic-2, retrying (2147483646 attempts left). Error: NOT_ENOUGH_REPLICAS
 ```

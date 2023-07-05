@@ -1,14 +1,13 @@
 package demo.kafka.producer;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import demo.kafka.properties.KafkaDemoProperties;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,17 +45,19 @@ public class KafkaProducerTest {
         final ProducerRecord<String, String> expectedRecord = new ProducerRecord<>(topic, key, data);
 
         when(propertiesMock.getOutboundTopic()).thenReturn(topic);
-        CompletableFuture futureResult = mock(CompletableFuture.class);
-        when(kafkaTemplateMock.send(any(ProducerRecord.class))).thenReturn(futureResult);
+        CompletableFuture<SendResult> futureResultMock = mock(CompletableFuture.class);
+        SendResult sendResultMock = mock(SendResult.class);
+        when(futureResultMock.get()).thenReturn(sendResultMock);
+        when(kafkaTemplateMock.send(any(ProducerRecord.class))).thenReturn(futureResultMock);
 
-        Future<RecordMetadata> result = kafkaClient.sendMessageAsync(key, data);
+        SendResult result = kafkaClient.sendMessage(key, data);
 
         verify(kafkaTemplateMock, times(1)).send(expectedRecord);
-        assertThat(result, equalTo(futureResult));
+        assertThat(result, equalTo(sendResultMock));
     }
 
     /**
-     * Ensure that an exception thrown on send is cleanly handled.
+     * Ensure that an exception thrown on send is percolated up.
      */
     @Test
     public void testProcess_ExceptionOnSend() throws Exception {
@@ -70,10 +71,10 @@ public class KafkaProducerTest {
         doThrow(new RuntimeException("Kafka send failure", new Exception("Failed"))).when(kafkaTemplateMock).send(any(ProducerRecord.class));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-                kafkaClient.sendMessageAsync(key, data);
+                kafkaClient.sendMessage(key, data);
         });
 
         verify(kafkaTemplateMock, times(1)).send(expectedRecord);
-        assertThat(exception.getMessage(), equalTo("Error sending message to topic " + topic));
+        assertThat(exception.getMessage(), equalTo("Kafka send failure"));
     }
 }

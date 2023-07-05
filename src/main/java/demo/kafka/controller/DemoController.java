@@ -5,6 +5,7 @@ import demo.kafka.service.DemoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,17 +22,17 @@ public class DemoController {
     private final DemoService demoService;
 
     @PostMapping("/trigger")
-    public ResponseEntity<Void> trigger(@RequestBody TriggerEventsRequest request) {
+    public ResponseEntity<String> trigger(@RequestBody TriggerEventsRequest request) {
         if(request.getNumberOfEvents() == null || request.getNumberOfEvents()<1) {
             log.error("Invalid number of events");
             return ResponseEntity.badRequest().build();
         }
         try {
             demoService.process(request);
-            return ResponseEntity.accepted().build();
+            return ResponseEntity.ok().build();
         } catch(Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -32,10 +32,10 @@ public class DemoControllerTest {
      * Ensure that the REST request is successfully passed on to the service.
      */
     @Test
-    public void testTrigger_Success() {
+    public void testTrigger_Success() throws Exception {
         TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
         ResponseEntity response = controller.trigger(request);
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
         verify(serviceMock, times(1)).process(request);
     }
 
@@ -43,17 +43,18 @@ public class DemoControllerTest {
      * If an exception is thrown, an internal server error is returned.
      */
     @Test
-    public void testTrigger_ServiceThrowsException() {
+    public void testTrigger_ServiceThrowsException() throws Exception{
         TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
-        doThrow(new RuntimeException("Service failure")).when(serviceMock).process(request);
+        doThrow(new Exception("Service failure")).when(serviceMock).process(request);
         ResponseEntity response = controller.trigger(request);
         assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getBody(), equalTo("Service failure"));
         verify(serviceMock, times(1)).process(request);
     }
 
     @ParameterizedTest
     @CsvSource(value = {"NULL, 400",
-                        "10, 202",
+                        "10, 200",
                         }, nullValues = "NULL")
     void testTrigger_Validation(Integer numberOfEvents, Integer expectedHttpStatusCode) {
         TriggerEventsRequest request = TriggerEventsRequest.builder()
