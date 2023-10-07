@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import demo.kafka.KafkaDemoConfiguration;
-import demo.kafka.event.DemoInboundEvent;
 import demo.kafka.event.DemoOutboundEvent;
 import demo.kafka.rest.api.TriggerEventsRequest;
 import demo.kafka.util.TestData;
@@ -21,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
@@ -36,7 +34,7 @@ import static org.hamcrest.Matchers.equalTo;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = { KafkaDemoConfiguration.class } )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ActiveProfiles("test")
-@EmbeddedKafka(controlledShutdown = true, topics = { "demo-inbound-topic", "demo-outbound-topic" })
+@EmbeddedKafka(controlledShutdown = true, topics = { "demo-outbound-topic" })
 public class EndToEndIntegrationTest {
 
     @Autowired
@@ -50,9 +48,6 @@ public class EndToEndIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Configuration
     static class TestConfig {
@@ -72,7 +67,11 @@ public class EndToEndIntegrationTest {
         @KafkaListener(
                 groupId = "EndToEndIntegrationTest",
                 topics = "demo-outbound-topic",
-                properties = "spring.json.value.default.type:demo.kafka.event.DemoOutboundEvent",
+                properties = {
+                        "bootstrap.servers:${kafka.bootstrap-servers}",
+                        "value.deserializer:org.springframework.kafka.support.serializer.JsonDeserializer",
+                        "spring.json.value.default.type:demo.kafka.event.DemoOutboundEvent"
+                },
                 autoStartup = "true")
         void receive(@Payload final DemoOutboundEvent payload) {
             log.debug("KafkaTestListener - Received message: " + payload);
@@ -125,22 +124,6 @@ public class EndToEndIntegrationTest {
         assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
 
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
-                .until(testReceiver.counter::get, equalTo(totalMessages));
-    }
-
-    /**
-     * Send in a multiple events to the service's inbound topic and ensure an outbound event is emitted to the service's
-     * outbound topic for each.
-     */
-    @Test
-    public void testConsumeAndProduceEvents() throws Exception {
-        int totalMessages = 10;
-        for (long counter=1; counter<=totalMessages; counter++) {
-            DemoInboundEvent inboundEvent = TestData.buildDemoInboundEvent(counter);
-            kafkaTemplate.send("demo-inbound-topic", inboundEvent).get();
-        }
-
-        Awaitility.await().atMost(60, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testReceiver.counter::get, equalTo(totalMessages));
     }
 }

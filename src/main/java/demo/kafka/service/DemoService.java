@@ -1,6 +1,5 @@
 package demo.kafka.service;
 
-import demo.kafka.event.DemoInboundEvent;
 import demo.kafka.event.DemoOutboundEvent;
 import demo.kafka.producer.KafkaProducer;
 import demo.kafka.rest.api.TriggerEventsRequest;
@@ -50,23 +49,14 @@ public class DemoService {
         log.info("Total events sent: {}", counter);
     }
 
-    public void processInboundEvent(DemoInboundEvent event) throws Exception {
-        log.info("Processing inbound event:"+event.getSequenceNumber());
-        sendEvent();
-    }
-
     /**
      * Emits an outbound event with a payload of a randomly generated name.
      */
     private void sendEvent() throws Exception {
-        sendEvent(RandomStringUtils.randomAlphabetic(10).toLowerCase(), RandomStringUtils.randomAlphabetic(10).toLowerCase(), RandomStringUtils.randomAlphabetic(10).toLowerCase());
-    }
-
-    private void sendEvent(String firstName, String middleName, String lastName) throws Exception {
         DemoOutboundEvent demoEvent = DemoOutboundEvent.builder()
-                .firstName(firstName)
-                .middleName(middleName)
-                .lastName(lastName)
+                .firstName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
+                .middleName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
+                .lastName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
                 .build();
         kafkaProducer.sendMessage(demoEvent);
     }

@@ -7,5 +7,4 @@ server:
 
 kafka:
     bootstrap-servers: localhost:9092
-    inboundTopic: "demo-inbound-topic"
     outboundTopic: "demo-outbound-topic"
