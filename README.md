@@ -113,8 +113,3 @@ docker network prune
 docker system prune
 docker volume prune
 ```
-
-# SCRATCH
-```
-14:13:27.786 WARN o.a.k.c.p.i.Sender - [Producer clientId=producer-1] Got error produce response with correlation id 460 on topic-partition demo-topic-2, retrying (2147483646 attempts left). Error: NOT_ENOUGH_REPLICAS
-```

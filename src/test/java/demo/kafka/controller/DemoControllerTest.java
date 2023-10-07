@@ -29,38 +29,61 @@ public class DemoControllerTest {
     }
 
     /**
-     * Ensure that the REST request is successfully passed on to the service.
+     * Ensure that the REST request is successfully passed on to the service, returning once complete
      */
     @Test
-    public void testTrigger_Success() throws Exception {
+    public void testTrigger_Sync_Success() throws Exception {
         TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
-        ResponseEntity response = controller.trigger(request);
+        ResponseEntity response = controller.trigger(request, false);
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
-        verify(serviceMock, times(1)).process(request);
+        verify(serviceMock, times(1)).triggerSync(request);
+    }
+
+    /**
+     * Ensure that the REST request is successfully passed on to the service, returning immediately.
+     */
+    @Test
+    public void testTrigger_Async_Success() throws Exception {
+        TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
+        ResponseEntity response = controller.trigger(request, true);
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
+        verify(serviceMock, times(1)).triggerAsync(request);
     }
 
     /**
      * If an exception is thrown, an internal server error is returned.
      */
     @Test
-    public void testTrigger_ServiceThrowsException() throws Exception{
+    public void testTrigger_Sync_ServiceThrowsException() throws Exception{
         TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
-        doThrow(new Exception("Service failure")).when(serviceMock).process(request);
-        ResponseEntity response = controller.trigger(request);
+        doThrow(new Exception("Service failure")).when(serviceMock).triggerSync(request);
+        ResponseEntity response = controller.trigger(request, false);
         assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
         assertThat(response.getBody(), equalTo("Service failure"));
-        verify(serviceMock, times(1)).process(request);
+        verify(serviceMock, times(1)).triggerSync(request);
+    }
+
+    /**
+     * If an exception is thrown but the service is called asynchronously, an ACCEPTED response is still returned
+     */
+    @Test
+    public void testTrigger_Async_ServiceThrowsException() throws Exception{
+        TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
+        doThrow(new Exception("Service failure")).when(serviceMock).triggerSync(request);
+        ResponseEntity response = controller.trigger(request, true);
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
+        verify(serviceMock, times(1)).triggerAsync(request);
     }
 
     @ParameterizedTest
     @CsvSource(value = {"NULL, 400",
-                        "10, 200",
+                        "10, 202",
                         }, nullValues = "NULL")
     void testTrigger_Validation(Integer numberOfEvents, Integer expectedHttpStatusCode) {
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(numberOfEvents)
                 .build();
-        ResponseEntity response = controller.trigger(request);
+        ResponseEntity response = controller.trigger(request, true);
         assertThat(response.getStatusCode().value(), equalTo(expectedHttpStatusCode));
     }
 }

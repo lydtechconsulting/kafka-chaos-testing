@@ -7,7 +7,5 @@ server:
 
 kafka:
     bootstrap-servers: localhost:9092
-    consumer:
-        maxPollIntervalMs: 30000
-        maxPollRecords: 500
-    outboundTopic: "demo-topic"
+    inboundTopic: "demo-inbound-topic"
+    outboundTopic: "demo-outbound-topic"

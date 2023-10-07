@@ -1,16 +1,13 @@
 package demo.kafka.util;
 
-import demo.kafka.event.DemoEvent;
+import demo.kafka.event.DemoInboundEvent;
 import demo.kafka.rest.api.TriggerEventsRequest;
-import org.apache.commons.lang3.RandomStringUtils;
 
 public class TestData {
 
-    public static DemoEvent buildDemoEvent(String id) {
-        return DemoEvent.builder()
-                .firstName(RandomStringUtils.randomAlphabetic(10))
-                .middleName(RandomStringUtils.randomAlphabetic(10))
-                .lastName(RandomStringUtils.randomAlphabetic(10))
+    public static DemoInboundEvent buildDemoInboundEvent(Long sequenceNumber) {
+        return DemoInboundEvent.builder()
+                .sequenceNumber(sequenceNumber)
                 .build();
     }
 

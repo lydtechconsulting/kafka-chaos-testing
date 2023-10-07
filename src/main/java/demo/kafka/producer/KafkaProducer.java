@@ -20,8 +20,8 @@ public class KafkaProducer {
     @Autowired
     private final KafkaTemplate kafkaTemplate;
 
-    public SendResult sendMessage(String key, Object payload) throws Exception {
-        final ProducerRecord<String, Object> record = new ProducerRecord<>(properties.getOutboundTopic(), key, payload);
+    public SendResult sendMessage(Object payload) throws Exception {
+        final ProducerRecord<String, Object> record = new ProducerRecord<>(properties.getOutboundTopic(), payload);
         try {
             return (SendResult) kafkaTemplate.send(record).get();
         } catch(Exception e) {

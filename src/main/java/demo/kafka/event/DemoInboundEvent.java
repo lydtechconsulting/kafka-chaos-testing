@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DemoEvent {
+public class DemoInboundEvent {
 
-    private String firstName;
-    private String middleName;
-    private String lastName;
+    private Long sequenceNumber;
 }

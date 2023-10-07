@@ -1,7 +1,7 @@
 package demo.kafka.component;
 
 import demo.kafka.rest.api.TriggerEventsRequest;
-import dev.lydtech.component.framework.client.conduktor.BrokerErrorType;
+import dev.lydtech.component.framework.client.conduktor.BrokenBrokerErrorType;
 import dev.lydtech.component.framework.client.conduktor.ConduktorGatewayClient;
 import dev.lydtech.component.framework.client.kafka.KafkaClient;
 import dev.lydtech.component.framework.client.service.ServiceClient;
@@ -35,7 +35,8 @@ public class BrokerFailureCT {
 
     @BeforeEach
     public void setup() {
-        consumer = KafkaClient.getInstance().initConsumer(GROUP_ID, "demo-topic", 3L);
+        // The test consumer for the service's outbound topic.
+        consumer = KafkaClient.getInstance().initConsumer(GROUP_ID, "demo-outbound-topic", 3L);
 
         conduktorGatewayClient = ConduktorGatewayClient.getInstance();
         conduktorGatewayClient.reset();
@@ -44,6 +45,7 @@ public class BrokerFailureCT {
     @AfterEach
     public void tearDown() {
         consumer.close();
+        conduktorGatewayClient.reset();
     }
 
     /**
@@ -51,7 +53,7 @@ public class BrokerFailureCT {
      */
     @Test
     public void testBroker_Healthy() throws Exception {
-        Integer NUMBER_OF_EVENTS = 1000;
+        Integer NUMBER_OF_EVENTS = 250;
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -71,13 +73,14 @@ public class BrokerFailureCT {
     /**
      * The Conduktor Gateway proxy simulates invalid required acks error.
      *
-     * Not retryable.
+     * This results in not a retryable exception on message produce.  The call to trigger event sending is made with the
+     * async flag set to false, so that the 500 error returned can be asserted.
      */
     @Test
-    public void testBroker_InvalidRequiredAcks() throws Exception {
-        conduktorGatewayClient.injectChaos(BrokerErrorType.INVALID_REQUIRED_ACKS);
+    public void testBroker_InvalidRequiredAcks() {
+        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.INVALID_REQUIRED_ACKS);
 
-        Integer NUMBER_OF_EVENTS = 1000;
+        Integer NUMBER_OF_EVENTS = 250;
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -87,7 +90,7 @@ public class BrokerFailureCT {
                 .spec(ServiceClient.getInstance().getRequestSpecification())
                 .contentType("application/json")
                 .body(JsonMapper.writeToJson(request))
-                .post("/v1/demo/trigger")
+                .post("/v1/demo/trigger?async=false")
                 .then()
                 .statusCode(500)
                 .and()
@@ -95,41 +98,17 @@ public class BrokerFailureCT {
     }
 
     /**
-     * The Conduktor Gateway proxy simulates request timed out error.
-     *
-     * Retryable.
-     */
-    @Test
-    public void testBroker_RequestTimedOut() throws Exception {
-        conduktorGatewayClient.injectChaos(BrokerErrorType.REQUEST_TIMED_OUT);
-
-        Integer NUMBER_OF_EVENTS = 1000;
-
-        TriggerEventsRequest request = TriggerEventsRequest.builder()
-                .numberOfEvents(NUMBER_OF_EVENTS)
-                .build();
-
-        RestAssured.given()
-                .spec(ServiceClient.getInstance().getRequestSpecification())
-                .contentType("application/json")
-                .body(JsonMapper.writeToJson(request))
-                .post("/v1/demo/trigger")
-                .then()
-                .statusCode(200);
-
-        KafkaClient.getInstance().consumeAndAssert("RequestTimedOut", consumer, NUMBER_OF_EVENTS, 3);
-    }
-
-    /**
      * The Conduktor Gateway proxy simulates not enough replicas error.
      *
-     * Retryable.
+     * This results in a retryable exception on message produce.  The call to trigger event sending is made with the
+     * async flag set to true - the sending happens asynchronously so the REST request returns immediately.  The service
+     * logs then show the message producing retrying until success.
      */
     @Test
     public void testBroker_NotEnoughReplicas() throws Exception {
-        conduktorGatewayClient.injectChaos(BrokerErrorType.NOT_ENOUGH_REPLICAS);
+        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.NOT_ENOUGH_REPLICAS);
 
-        Integer NUMBER_OF_EVENTS = 1000;
+        Integer NUMBER_OF_EVENTS = 250;
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -139,10 +118,119 @@ public class BrokerFailureCT {
                 .spec(ServiceClient.getInstance().getRequestSpecification())
                 .contentType("application/json")
                 .body(JsonMapper.writeToJson(request))
-                .post("/v1/demo/trigger")
+                .post("/v1/demo/trigger?async=true")
                 .then()
-                .statusCode(200);
+                .statusCode(202);
 
         KafkaClient.getInstance().consumeAndAssert("NotEnoughReplicas", consumer, NUMBER_OF_EVENTS, 3);
+    }
+
+    /**
+     * The Conduktor Gateway proxy simulates a corrupt message error.
+     *
+     * This results in a retryable exception on message produce.  The call to trigger event sending is made with the
+     * async flag set to true - the sending happens asynchronously so the REST request returns immediately.  The service
+     * logs then show the message producing retrying until success.
+     */
+    @Test
+    public void testBroker_CorruptMessage() throws Exception {
+        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.CORRUPT_MESSAGE);
+
+        Integer NUMBER_OF_EVENTS = 250;
+
+        TriggerEventsRequest request = TriggerEventsRequest.builder()
+                .numberOfEvents(NUMBER_OF_EVENTS)
+                .build();
+
+        RestAssured.given()
+                .spec(ServiceClient.getInstance().getRequestSpecification())
+                .contentType("application/json")
+                .body(JsonMapper.writeToJson(request))
+                .post("/v1/demo/trigger?async=true")
+                .then()
+                .statusCode(202);
+
+        KafkaClient.getInstance().consumeAndAssert("CorruptMessage", consumer, NUMBER_OF_EVENTS, 3);
+    }
+
+    /**
+     * The Conduktor Gateway proxy simulates unknown server error.
+     *
+     * This results in not a retryable exception on message produce.  The call to trigger event sending is made with the
+     * async flag set to false, so that the 500 error returned can be asserted.
+     */
+    @Test
+    public void testBroker_UnknownServerError() {
+        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.UNKNOWN_SERVER_ERROR);
+
+        Integer NUMBER_OF_EVENTS = 250;
+
+        TriggerEventsRequest request = TriggerEventsRequest.builder()
+                .numberOfEvents(NUMBER_OF_EVENTS)
+                .build();
+
+        RestAssured.given()
+                .spec(ServiceClient.getInstance().getRequestSpecification())
+                .contentType("application/json")
+                .body(JsonMapper.writeToJson(request))
+                .post("/v1/demo/trigger?async=false")
+                .then()
+                .statusCode(500)
+                .and()
+                .body(containsString("org.apache.kafka.common.errors.UnknownServerException: The server experienced an unexpected error when processing the request."));
+    }
+
+    /**
+     * The Conduktor Gateway proxy simulates a leader election error.
+     *
+     * This results in a retryable exception on message produce.  The call to trigger event sending is made with the
+     * async flag set to true - the sending happens asynchronously so the REST request returns immediately.  The service
+     * logs then show the message producing retrying until success.
+     */
+    @Test
+    public void testBroker_LeaderElection() throws Exception {
+        conduktorGatewayClient.simulateLeaderElection(20);
+
+        Integer NUMBER_OF_EVENTS = 250;
+
+        TriggerEventsRequest request = TriggerEventsRequest.builder()
+                .numberOfEvents(NUMBER_OF_EVENTS)
+                .build();
+
+        RestAssured.given()
+                .spec(ServiceClient.getInstance().getRequestSpecification())
+                .contentType("application/json")
+                .body(JsonMapper.writeToJson(request))
+                .post("/v1/demo/trigger?async=true")
+                .then()
+                .statusCode(202);
+
+        KafkaClient.getInstance().consumeAndAssert("LeaderElection", consumer, NUMBER_OF_EVENTS, 3);
+    }
+
+    /**
+     * The Conduktor Gateway proxy simulates a slow broker.
+     *
+     * A latency of between 35 and 150 milliseconds is added by the gateway to 50% of the produce requests.
+     */
+    @Test
+    public void testBroker_SlowBroker() throws Exception {
+        conduktorGatewayClient.simulateSlowBroker(50, 35, 150);
+
+        Integer NUMBER_OF_EVENTS = 250;
+
+        TriggerEventsRequest request = TriggerEventsRequest.builder()
+                .numberOfEvents(NUMBER_OF_EVENTS)
+                .build();
+
+        RestAssured.given()
+                .spec(ServiceClient.getInstance().getRequestSpecification())
+                .contentType("application/json")
+                .body(JsonMapper.writeToJson(request))
+                .post("/v1/demo/trigger?async=true")
+                .then()
+                .statusCode(202);
+
+        KafkaClient.getInstance().consumeAndAssert("SlowBroker", consumer, NUMBER_OF_EVENTS, 3);
     }
 }

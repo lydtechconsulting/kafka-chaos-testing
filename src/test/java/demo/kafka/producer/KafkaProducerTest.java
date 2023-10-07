@@ -38,11 +38,10 @@ public class KafkaProducerTest {
      */
     @Test
     public void testProcess_Success() throws Exception {
-        String key = "test-key";
         String data = randomUUID().toString();
         String topic = "test-outbound-topic";
 
-        final ProducerRecord<String, String> expectedRecord = new ProducerRecord<>(topic, key, data);
+        final ProducerRecord<String, String> expectedRecord = new ProducerRecord<>(topic, data);
 
         when(propertiesMock.getOutboundTopic()).thenReturn(topic);
         CompletableFuture<SendResult> futureResultMock = mock(CompletableFuture.class);
@@ -50,7 +49,7 @@ public class KafkaProducerTest {
         when(futureResultMock.get()).thenReturn(sendResultMock);
         when(kafkaTemplateMock.send(any(ProducerRecord.class))).thenReturn(futureResultMock);
 
-        SendResult result = kafkaClient.sendMessage(key, data);
+        SendResult result = kafkaClient.sendMessage(data);
 
         verify(kafkaTemplateMock, times(1)).send(expectedRecord);
         assertThat(result, equalTo(sendResultMock));
@@ -60,18 +59,17 @@ public class KafkaProducerTest {
      * Ensure that an exception thrown on send is percolated up.
      */
     @Test
-    public void testProcess_ExceptionOnSend() throws Exception {
-        String key = "test-key";
+    public void testProcess_ExceptionOnSend() {
         String data = randomUUID().toString();
         String topic = "test-outbound-topic";
 
-        final ProducerRecord<String, String> expectedRecord = new ProducerRecord<>(topic, key, data);
+        final ProducerRecord<String, String> expectedRecord = new ProducerRecord<>(topic, data);
 
         when(propertiesMock.getOutboundTopic()).thenReturn(topic);
         doThrow(new RuntimeException("Kafka send failure", new Exception("Failed"))).when(kafkaTemplateMock).send(any(ProducerRecord.class));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-                kafkaClient.sendMessage(key, data);
+                kafkaClient.sendMessage(data);
         });
 
         verify(kafkaTemplateMock, times(1)).send(expectedRecord);
