@@ -8,3 +8,24 @@ server:
 kafka:
     bootstrap-servers: localhost:9092
     outboundTopic: "demo-outbound-topic"
+    producer:
+        # Default: 2147483647
+        # Change to 0 to stop retry behaviour
+        retries: 2147483647
+
+        # Default: 120000 (2 mins)
+        # Change to low number to reduce time for retry
+        # Must be equal to or larger than linger.ms (defaults to 0) + request.timeout.ms (defaults to 30 seconds)
+        delivery:
+            timeout:
+                ms: 120000
+
+        # Default: 30000
+        request:
+            timeout:
+                ms: 30000
+
+        # Default: 0
+        linger:
+            ms: 0
+

@@ -26,9 +26,9 @@ import static org.hamcrest.Matchers.containsString;
  */
 @Slf4j
 @ExtendWith(TestContainersSetupExtension.class)
-public class BrokerFailureCT {
+public class ResilienceCT {
 
-    private static final String GROUP_ID = "BrokerFailureCT";
+    private static final String GROUP_ID = "ResilienceCT";
 
     private Consumer consumer;
     private ConduktorGatewayClient conduktorGatewayClient;
@@ -52,7 +52,7 @@ public class BrokerFailureCT {
      * The Conduktor Gateway proxy routes the messages straight through to Kafka.
      */
     @Test
-    public void testBroker_Healthy() throws Exception {
+    public void testResilience_Healthy() throws Exception {
         Integer NUMBER_OF_EVENTS = 250;
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
@@ -77,7 +77,7 @@ public class BrokerFailureCT {
      * async flag set to false, so that the 500 error returned can be asserted.
      */
     @Test
-    public void testBroker_InvalidRequiredAcks() {
+    public void testResilience_InvalidRequiredAcks() {
         conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.INVALID_REQUIRED_ACKS);
 
         Integer NUMBER_OF_EVENTS = 250;
@@ -105,7 +105,7 @@ public class BrokerFailureCT {
      * logs then show the message producing retrying until success.
      */
     @Test
-    public void testBroker_NotEnoughReplicas() throws Exception {
+    public void testResilience_NotEnoughReplicas() throws Exception {
         conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.NOT_ENOUGH_REPLICAS);
 
         Integer NUMBER_OF_EVENTS = 250;
@@ -133,7 +133,7 @@ public class BrokerFailureCT {
      * logs then show the message producing retrying until success.
      */
     @Test
-    public void testBroker_CorruptMessage() throws Exception {
+    public void testResilience_CorruptMessage() throws Exception {
         conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.CORRUPT_MESSAGE);
 
         Integer NUMBER_OF_EVENTS = 250;
@@ -160,7 +160,7 @@ public class BrokerFailureCT {
      * async flag set to false, so that the 500 error returned can be asserted.
      */
     @Test
-    public void testBroker_UnknownServerError() {
+    public void testResilience_UnknownServerError() {
         conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.UNKNOWN_SERVER_ERROR);
 
         Integer NUMBER_OF_EVENTS = 250;
@@ -188,7 +188,7 @@ public class BrokerFailureCT {
      * logs then show the message producing retrying until success.
      */
     @Test
-    public void testBroker_LeaderElection() throws Exception {
+    public void testResilience_LeaderElection() throws Exception {
         conduktorGatewayClient.simulateLeaderElection(20);
 
         Integer NUMBER_OF_EVENTS = 250;
@@ -214,7 +214,7 @@ public class BrokerFailureCT {
      * A latency of between 35 and 150 milliseconds is added by the gateway to 50% of the produce requests.
      */
     @Test
-    public void testBroker_SlowBroker() throws Exception {
+    public void testResilience_SlowBroker() throws Exception {
         conduktorGatewayClient.simulateSlowBroker(50, 35, 150);
 
         Integer NUMBER_OF_EVENTS = 250;
