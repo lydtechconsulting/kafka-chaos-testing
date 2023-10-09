@@ -78,9 +78,10 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_InvalidRequiredAcks() {
-        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.INVALID_REQUIRED_ACKS);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 20;
+
+        conduktorGatewayClient.simulateBrokenBroker(FAILURE_RATE_PERCENTAGE, BrokenBrokerErrorType.INVALID_REQUIRED_ACKS);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -106,9 +107,10 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_NotEnoughReplicas() throws Exception {
-        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.NOT_ENOUGH_REPLICAS);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 20;
+
+        conduktorGatewayClient.simulateBrokenBroker(FAILURE_RATE_PERCENTAGE, BrokenBrokerErrorType.NOT_ENOUGH_REPLICAS);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -134,9 +136,10 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_CorruptMessage() throws Exception {
-        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.CORRUPT_MESSAGE);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 20;
+
+        conduktorGatewayClient.simulateBrokenBroker(FAILURE_RATE_PERCENTAGE, BrokenBrokerErrorType.CORRUPT_MESSAGE);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -161,9 +164,10 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_UnknownServerError() {
-        conduktorGatewayClient.simulateBrokenBroker(20, BrokenBrokerErrorType.UNKNOWN_SERVER_ERROR);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 20;
+
+        conduktorGatewayClient.simulateBrokenBroker(FAILURE_RATE_PERCENTAGE, BrokenBrokerErrorType.UNKNOWN_SERVER_ERROR);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -189,9 +193,10 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_LeaderElection() throws Exception {
-        conduktorGatewayClient.simulateLeaderElection(20);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 20;
+
+        conduktorGatewayClient.simulateLeaderElection(FAILURE_RATE_PERCENTAGE);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
@@ -215,9 +220,12 @@ public class ResilienceCT {
      */
     @Test
     public void testResilience_SlowBroker() throws Exception {
-        conduktorGatewayClient.simulateSlowBroker(50, 35, 150);
-
         Integer NUMBER_OF_EVENTS = 250;
+        Integer FAILURE_RATE_PERCENTAGE = 100;
+        Integer MIN_LATENCY = 20;
+        Integer MAX_LATENCY = 100;
+
+        conduktorGatewayClient.simulateSlowBroker(FAILURE_RATE_PERCENTAGE, MIN_LATENCY, MAX_LATENCY);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
