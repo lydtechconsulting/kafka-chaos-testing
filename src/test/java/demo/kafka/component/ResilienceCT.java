@@ -20,9 +20,9 @@ import static org.hamcrest.Matchers.containsString;
 /**
  * Each tests sends in a REST request to trigger sending multiple events.
  *
- * The REST call returns immediately, as it sends the events asychronously.
- *
- * The test listener consumes the events emitted by the application and asserts the expected number have been received.
+ * The test listener consumes the events emitted by the application and asserts the expected number have been received,
+ * or if a non-retryable exception is expected to be thrown due to the simulated error scenario, the test asserts for
+ * this.
  */
 @Slf4j
 @ExtendWith(TestContainersSetupExtension.class)
