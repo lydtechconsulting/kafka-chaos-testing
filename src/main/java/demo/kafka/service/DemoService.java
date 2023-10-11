@@ -5,10 +5,11 @@ import demo.kafka.producer.KafkaProducer;
 import demo.kafka.rest.api.TriggerEventsRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 @Service
 @Slf4j
@@ -54,9 +55,7 @@ public class DemoService {
      */
     private void sendEvent() throws Exception {
         DemoOutboundEvent demoEvent = DemoOutboundEvent.builder()
-                .firstName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
-                .middleName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
-                .lastName(RandomStringUtils.randomAlphabetic(10).toLowerCase())
+                .name(randomAlphabetic(1).toUpperCase() + randomAlphabetic(7).toLowerCase())
                 .build();
         kafkaProducer.sendMessage(demoEvent);
     }

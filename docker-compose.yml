@@ -30,7 +30,7 @@ services:
             KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR:
 
     conduktor-gateway:
-        image: conduktor/conduktor-proxy:1.8.2.1-amd64
+        image: conduktor/conduktor-gateway:2.1.5
         hostname: conduktor-gateway
         container_name: conduktor-gateway
         depends_on:
@@ -40,12 +40,8 @@ services:
             - "8888:8888"
         environment:
             KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-            PROXY_HOST: localhost
-            PROXY_PORT_RANGE: 6969:6969
+            GATEWAY_HOST: localhost
+            GATEWAY_PORT_RANGE: 6969:6969
             HTTP_PORT: 8888
             FEATURE_FLAGS_SINGLE_TENANT: "true"
             AUTHENTICATION_AUTHENTICATOR_TYPE: "NONE"
-            USER_POOL_TYPE: "JWT"
-            USER_POOL_SECRET_KEY: "SECRET"
-            ADMIN_API_USERS: "[{username: superUser, password: superUser}]"
-            ADMIN_API_SECRET: "OaM4lG+xO5Gz10GB1apZ2XDUuWw/sK1H+XXcgExpYm2YEHgnvEf63q9TJraebD3SQb/JzefcZkUEKz/8V5V+Fg=="

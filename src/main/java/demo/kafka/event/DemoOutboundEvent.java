@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DemoOutboundEvent {
 
-    private String firstName;
-    private String middleName;
-    private String lastName;
+    private String name;
 }

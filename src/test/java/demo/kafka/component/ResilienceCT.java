@@ -73,7 +73,7 @@ public class ResilienceCT {
     /**
      * The Conduktor Gateway proxy simulates invalid required acks error.
      *
-     * This results in not a retryable exception on message produce.  The call to trigger event sending is made with the
+     * This results in a not retryable exception on message produce.  The call to trigger event sending is made with the
      * async flag set to false, so that the 500 error returned can be asserted.
      */
     @Test
@@ -159,7 +159,7 @@ public class ResilienceCT {
     /**
      * The Conduktor Gateway proxy simulates unknown server error.
      *
-     * This results in not a retryable exception on message produce.  The call to trigger event sending is made with the
+     * This results in a not retryable exception on message produce.  The call to trigger event sending is made with the
      * async flag set to false, so that the 500 error returned can be asserted.
      */
     @Test

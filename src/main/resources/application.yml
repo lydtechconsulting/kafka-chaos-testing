@@ -6,7 +6,8 @@ server:
     port: 9001
 
 kafka:
-    bootstrap-servers: localhost:9092
+    # Bootstrap URL points to Conduktor Gateway
+    bootstrap-servers: localhost:6969
     outboundTopic: "demo-outbound-topic"
     producer:
         # Default: 2147483647
