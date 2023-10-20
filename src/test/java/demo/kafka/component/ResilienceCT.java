@@ -216,16 +216,16 @@ public class ResilienceCT {
     /**
      * The Conduktor Gateway proxy simulates a slow broker.
      *
-     * A latency of between 35 and 150 milliseconds is added by the gateway to 50% of the produce requests.
+     * A latency of between 20 and 100 milliseconds is added by the gateway to 100% of the produce requests.
      */
     @Test
     public void testResilience_SlowBroker() throws Exception {
         Integer NUMBER_OF_EVENTS = 250;
-        Integer FAILURE_RATE_PERCENTAGE = 100;
+        Integer RATE_IN_PERCENTAGE = 100;
         Integer MIN_LATENCY = 20;
         Integer MAX_LATENCY = 100;
 
-        conduktorGatewayClient.simulateSlowBroker(FAILURE_RATE_PERCENTAGE, MIN_LATENCY, MAX_LATENCY);
+        conduktorGatewayClient.simulateSlowBroker(RATE_IN_PERCENTAGE, MIN_LATENCY, MAX_LATENCY);
 
         TriggerEventsRequest request = TriggerEventsRequest.builder()
                 .numberOfEvents(NUMBER_OF_EVENTS)
