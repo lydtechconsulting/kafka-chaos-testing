@@ -2,6 +2,10 @@
 
 Spring Boot application demonstrating chaos testing a Spring Boot application that integrates with Kafka as the messaging broker to send and receive events, using Conduktor Gateway to simulate failure scenarios with Kafka.
 
+This repo accompanies the following article:
+
+- [Kafka Chaos Testing With Conduktor Gateway](https://www.lydtechconsulting.com/blog-kafka-chaos-testing.html): Automating Kafka chaos testing using Conduktor Gateway.
+
 ## Overview
 
 Conduktor Gateway sits as a proxy between the Spring Boot application and Kafka.  The Gateway can be configured to simulate broker failure scenarios, returning errors to the producer requests.  This is used to verify that the application behaves as expected under error scenarios.  See https://www.conduktor.io/gateway/ for more on Conduktor Gateway.
