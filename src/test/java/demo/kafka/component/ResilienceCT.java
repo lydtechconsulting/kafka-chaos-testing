@@ -5,7 +5,7 @@ import dev.lydtech.component.framework.client.conduktor.BrokenBrokerErrorType;
 import dev.lydtech.component.framework.client.conduktor.ConduktorGatewayClient;
 import dev.lydtech.component.framework.client.kafka.KafkaClient;
 import dev.lydtech.component.framework.client.service.ServiceClient;
-import dev.lydtech.component.framework.extension.TestContainersSetupExtension;
+import dev.lydtech.component.framework.extension.ComponentTestExtension;
 import dev.lydtech.component.framework.mapper.JsonMapper;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.containsString;
  * this.
  */
 @Slf4j
-@ExtendWith(TestContainersSetupExtension.class)
+@ExtendWith(ComponentTestExtension.class)
 public class ResilienceCT {
 
     private static final String GROUP_ID = "ResilienceCT";

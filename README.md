@@ -118,6 +118,8 @@ The tests then assert that the application behaves as expected in these error sc
 
 The producer retry behaviour (as described above) can be overridden just for the component tests in `src/test/resources/application-component-test.yml`.  This means the application does not need to be rebuilt between test runs, although the docker container for the application does need to be rebuilt and restarted.
 
+To test the application running against the Apache Kafka native instance, set `kafka.enabled` to `false` and `kafka.native.enabled` to `true` in the `pom.xml`.
+
 ### Build
 
 Build Spring Boot application jar:

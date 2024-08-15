@@ -1,4 +1,7 @@
 ---
+server:
+    port: 8080
+
 kafka:
     bootstrap-servers: conduktorgateway:6969
     producer:

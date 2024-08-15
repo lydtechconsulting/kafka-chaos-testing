@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.7</version>
+		<version>3.3.1</version>
 		<relativePath/>
 	</parent>
 	<groupId>demo.kafka</groupId>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>dev.lydtech</groupId>
 			<artifactId>component-test-framework</artifactId>
-			<version>2.3.0</version>
+			<version>3.5.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -119,17 +119,18 @@
 								<include>*CT.*</include>
 							</includes>
 							<environmentVariables>
-								<TESTCONTAINERS_RYUK_DISABLED>${containers.stayup}</TESTCONTAINERS_RYUK_DISABLED>
+								<TESTCONTAINERS_REUSE_ENABLE>${containers.stayup}</TESTCONTAINERS_REUSE_ENABLE>
 							</environmentVariables>
 							<systemPropertyVariables>
 								<service.name>${project.name}</service.name>
 								<service.instance.count>1</service.instance.count>
 								<service.container.logging.enabled>false</service.container.logging.enabled>
 								<kafka.enabled>true</kafka.enabled>
+								<kafka.native.enabled>false</kafka.native.enabled>
 								<kafka.topic.partition.count>3</kafka.topic.partition.count>
 								<kafka.container.logging.enabled>false</kafka.container.logging.enabled>
 								<conduktor.gateway.enabled>true</conduktor.gateway.enabled>
-								<conduktor.gateway.image.tag>2.1.5</conduktor.gateway.image.tag>
+								<conduktor.gateway.image.tag>3.2.1</conduktor.gateway.image.tag>
 								<conduktor.gateway.proxy.port>6969</conduktor.gateway.proxy.port>
 								<conduktor.gateway.http.port>8888</conduktor.gateway.http.port>
 								<conduktor.gateway.logging.enabled>false</conduktor.gateway.logging.enabled>
