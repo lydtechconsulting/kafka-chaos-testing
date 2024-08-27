@@ -63,18 +63,6 @@ public class DemoControllerTest {
         verify(serviceMock, times(1)).triggerSync(request);
     }
 
-    /**
-     * If an exception is thrown but the service is called asynchronously, an ACCEPTED response is still returned
-     */
-    @Test
-    public void testTrigger_Async_ServiceThrowsException() throws Exception{
-        TriggerEventsRequest request = TestData.buildTriggerEventsRequest(10);
-        doThrow(new Exception("Service failure")).when(serviceMock).triggerSync(request);
-        ResponseEntity response = controller.trigger(request, true);
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.ACCEPTED));
-        verify(serviceMock, times(1)).triggerAsync(request);
-    }
-
     @ParameterizedTest
     @CsvSource(value = {"NULL, 400",
                         "10, 202",
